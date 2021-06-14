@@ -70,32 +70,6 @@ public class LocaleManager: NSObject {
     }
     
     /**
-     Reloads all windows to apply orientation changes in user interface.
-     
-     - Important: Either rootViewController must be set or storyboardIdentifier of root viewcontroller
-         in Main.storyboard must set to a string.
-    */
-    internal class func reloadWindows(animated: Bool = true) {
-        let windows = UIApplication.shared.windows
-        for window in windows {
-            if let rootViewController = self.rootViewController?(window) {
-                window.rootViewController = rootViewController
-            } else if let storyboard = window.rootViewController?.storyboard, let id = window.rootViewController?.value(forKey: "storyboardIdentifier") as? String {
-                window.rootViewController = storyboard.instantiateViewController(withIdentifier: id)
-            }
-            for view in (window.subviews) {
-                view.removeFromSuperview()
-                window.addSubview(view)
-            }
-        }
-        if animated {
-            windows.first.map {
-                UIView.transition(with: $0, duration: 0.55, options: .transitionFlipFromLeft, animations: nil, completion: nil)
-            }
-        }
-    }
-    
-    /**
      Overrides system-wide locale in application setting.
      
      - Parameter identifier: Locale identifier to be applied, e.g. `en`, `fa`, `de_DE`, etc.
@@ -123,7 +97,7 @@ public class LocaleManager: NSObject {
      - Parameter identifier: Locale identifier to be applied, e.g. `en` or `fa_IR`. `nil` value will change locale to system-wide.
      */
     @available(iOS 9.0, *)
-    @objc public class func apply(locale: Locale?, animated: Bool = true) {
+    @objc public class func apply(locale: Locale?, animated: Bool = false) {
         let semantic: UISemanticContentAttribute
         if let locale = locale {
             setLocale(identifiers: [locale.identifier])
@@ -137,7 +111,6 @@ public class LocaleManager: NSObject {
         UITableView.appearance().semanticContentAttribute = semantic
         UISwitch.appearance().semanticContentAttribute = semantic
         
-        reloadWindows(animated: animated)
         updateHandler()
     }
     
@@ -147,7 +120,7 @@ public class LocaleManager: NSObject {
      - Parameter identifier: Locale identifier to be applied, e.g. `en` or `fa_IR`. `nil` value will change locale to system-wide.
      */
     @available(iOS 9.0, *)
-    @objc public class func apply(identifier: String?, animated: Bool = true) {
+    @objc public class func apply(identifier: String?, animated: Bool = false) {
         let locale = identifier.map(Locale.init(identifier:))
         apply(locale: locale, animated: animated)
     }
